@@ -1,18 +1,40 @@
 # PNEI Waddington Simulator
 
-Interactive visualization of the PNEI (Psychoneuroendocrinoimmunology) epigenetic landscape using Waddington's model.
+**A Pragmatic, Multi-Modal Model of Human Psycho-Neuro-Endocrine-Immunological States**
 
-## Philosophy: States, Not Categories
+Interactive visualization and experimental design tool using **Waddington's Epigenetic Landscape** to model human states through comprehensive physiological measures.
 
-**This is NOT a tool to classify "normal" vs "pathological".**
+## 🎯 Philosophy: Transitory States, Not Fixed Categories
 
-Instead, it models **transient states accessible to all humans** depending on stress, environment, and neuroplasticity:
+**This is NOT a diagnostic tool. This is NOT about classifying "normal" vs "pathological".**
 
-- **"Baseline"** = Statistical snapshot of humans in optimal conditions (rest, support, health)
-- **"Rigid State"** = Accessible to anyone under chronic stress (burnout, hypervigilance, trauma)
-- **"Dispersed State"** = Accessible to anyone under cognitive overload (sleep deprivation, multitasking)
+### The A Posteriori Paradigm
 
-We use clinical populations (NT, ASD, ADHD) as **ecological snapshots** to study universal mechanisms, not as fixed diagnostic labels.
+We build a **pragmatic model** based on measurable states, not idealistic categories:
+
+- **"Neurotypical"** = Snapshot of optimal conditions (rest, social support, health)
+- **"ASD-like State"** = Rigidity pattern accessible to anyone (burnout, hypervigilance, trauma)
+- **"ADHD-like State"** = Dispersion pattern accessible to anyone (sleep deprivation, cognitive overload, chronic stress)
+
+### Why Study Clinical Groups?
+
+**Mathematical Reason:** Clinical groups occupy the **asymptotic boundaries** of the state space. The neurotypical population clusters near equilibrium where subtle relationships are invisible. Clinical groups reveal the **non-linear dynamics** that govern all humans.
+
+**Philosophical Reason:** They are not "broken humans" but **explorers of landscape limits**. Under extreme stress, bereavement, or inflammation, any brain can transition to these topological states.
+
+## 🔬 Multi-Modal PNEI Framework
+
+### Comprehensive Physiological Operationalization
+
+| Landscape Parameter | Physiological Measure | System | Interpretation |
+|---------------------|----------------------|--------|----------------|
+| **Depth** | HRV (RMSSD) | Autonomic (Parasympathetic) | Resilience, vagal tone |
+| **Noise** | GSR + fNIRS (Amygdala) | Autonomic (Sympathetic) + Limbic | Stress, emotional reactivity |
+| **Width** | Behavioral Rigidity | Executive (DLPFC) | Cognitive flexibility |
+| **rTPJ** | fNIRS (Social Brain) | Social Network | Theory of Mind load |
+| **DLPFC** | fNIRS (Executive) | Executive Network | Cognitive control |
+
+**Innovation:** Bridges abstract dynamical systems theory with concrete, measurable physiological signals (HRV, GSR, fNIRS).
 
 ## Mathematical Model
 
@@ -25,13 +47,25 @@ Where:
 - **-∇U(x)**: Deterministic force (tendency to return to homeostasis)
 - **ξ(t)**: Stochastic noise (Stress, Environment)
 
-## Features
+## 📊 Features
 
-- **3D Landscape Visualization**: Interactive 3D plot showing the epigenetic landscape
-- **Trajectory Simulation**: Real-time particle trajectory using Euler-Maruyama method
-- **Clinical Profiles**: Pre-configured neuroprofiles (Neurotypical, ASD, ADHD)
-- **Dynamic Parameters**: Adjust valley depth, width, noise intensity, and simulation time
-- **Clinical Analysis**: Real-time metrics for homeostasis and allostatic load
+### Main Simulator (PNEI_Waddington_Simulator.py) ⭐
+**Complete experimental design and validation tool**
+
+- ✅ **Multi-Modal Sensor Dashboard**: HRV, GSR, fNIRS (Amygdala, rTPJ, DLPFC)
+- ✅ **Experimental Design Matrix**: 3 Populations × 3 Environments (9 scenarios)
+- ✅ **Predicted Physiological Responses**: Shows expected sensor readings for each condition
+- ✅ **Waddington Landscape Visualization**: 2D potential well with particle dynamics
+- ✅ **State Trajectory Over Time**: Temporal evolution with PNEI-mapped zones
+- ✅ **Comprehensive Operationalization Table**: Maps landscape ↔ physiology
+- ✅ **Scientific Justification**: Explains why clinical groups inform universal mechanisms
+
+### Alternative Versions
+
+See [SIMULATOR_VERSIONS.md](SIMULATOR_VERSIONS.md) for detailed comparison:
+- **Simulator1**: Educational/mathematical focus
+- **Simulator2**: Philosophical/conceptual exploration  
+- **Simulator3**: Interactive demo with preset buttons
 
 ## Requirements
 
