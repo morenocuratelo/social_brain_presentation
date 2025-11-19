@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Social Brain: Human vs LLM</title>
+    <!-- 
+         VERSION U10 (HIERARCHICAL NAV):
+         - Refactored Data Structure: Macro-Sections -> Sub-Slides.
+         - Added Secondary Navigation Bar for sub-tabs.
+         - Labels:
+           * 1. Exp. Setting (Design, Procedure)
+           * RQ1: Social Weight (Social Bypass, Logical Depuration)
+           * RQ2: Interactivity (Phantom ToM, Burnout)
+         - Preserved distinct population colors (Cyan/Fuchsia/Rose).
+    -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* Slate-50 */
+        }
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        @media (min-width: 768px) {
+            .chart-wrapper {
+                height: 400px;
+            }
+        }
+        /* Main Nav Pills */
+        .nav-pill {
+            transition: all 0.2s ease;
+        }
+        .nav-pill:hover {
+            transform: translateY(-1px);
+        }
+        /* Sub Nav Tabs */
+        .sub-tab {
+            position: relative;
+            transition: color 0.2s ease;
+        }
+        .sub-tab::after {
+            content: '';
+            position: absolute;
+            bottom: -8px; /* align with border */
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: transparent;
+            transition: background-color 0.2s ease;
+        }
+        .sub-tab.active::after {
+            background-color: #4f46e5; /* Indigo-600 */
+        }
+        
+        .slide-enter {
+            animation: slideIn 0.4s ease-out forwards;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .prose-content::-webkit-scrollbar {
+            width: 6px;
+        }
+        .prose-content::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 4px;
+        }
+        /* Waddington Widget Styles */
+        .waddington-controls {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .waddington-slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #cbd5e1;
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        .waddington-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #4f46e5;
+            cursor: pointer;
+        }
+        .waddington-slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #4f46e5;
+            cursor: pointer;
+            border: none;
+        }
+        .preset-btn-mini {
+            padding: 8px 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 11px;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        .preset-btn-mini:hover {
+            border-color: #4f46e5;
+            background: #eef2ff;
+        }
+        .preset-btn-mini.active {
+            background: #4f46e5;
+            color: white;
+            border-color: #4f46e5;
+        }
+    </style>
+</head>
+<body class="text-slate-800 h-screen flex flex-col overflow-hidden">
+
+    <!-- TOP BAR -->
+    <header class="bg-white border-b border-slate-200 shrink-0 z-30">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold shadow-sm">SB</div>
+                <div>
+                    <h1 class="text-lg font-bold text-slate-900 leading-tight">The Social Brain</h1>
+                    <p class="text-xs text-slate-500 font-medium uppercase tracking-wider">Experimental Design: Human vs LLM</p>
+                </div>
+            </div>
+            <div class="text-xs font-mono text-slate-400 hidden md:block">
+                Reference: u10_presentation_deck_v5
+            </div>
+        </div>
+    </header>
+
+    <!-- NAVIGATION AREA -->
+    <div class="bg-white shadow-sm shrink-0 z-20 flex flex-col">
+        <!-- Level 1: Macro Sections -->
+        <div class="border-b border-slate-100">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="flex space-x-1 overflow-x-auto py-3" id="main-nav-container">
+                    <!-- Main Sections injected by JS -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Level 2: Sub-Tabs (Contextual) -->
+        <div class="bg-slate-50 border-b border-slate-200 hidden" id="sub-nav-wrapper">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="flex space-x-6 overflow-x-auto py-3" id="sub-nav-container">
+                    <!-- Sub Tabs injected by JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTENT AREA -->
+    <main class="flex-1 overflow-hidden relative flex flex-col md:flex-row bg-slate-50">
+        
+        <!-- LEFT: Text/Narrative Panel -->
+        <section class="flex-1 overflow-y-auto p-6 md:p-10 border-r border-slate-200 bg-white slide-enter" id="text-panel">
+            <!-- Content injected by JS -->
+        </section>
+
+        <!-- RIGHT: Visual/Data Panel -->
+        <section class="h-1/2 md:h-auto md:w-1/2 lg:w-5/12 bg-slate-50 p-6 flex flex-col justify-center items-center border-t md:border-t-0 md:border-l border-slate-200" id="visual-panel">
+            <div class="w-full max-w-md bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                <h3 class="text-sm font-semibold text-slate-500 mb-4 uppercase tracking-wide text-center" id="chart-title">Data Visualisation</h3>
+                <div class="chart-wrapper">
+                    <canvas id="main-chart"></canvas>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // --- COLOR CONSTANTS ---
+        const COLORS = {
+            // TOOLS
+            HUMAN: '#4f46e5',   // Indigo
+            LLM: '#10b981',     // Emerald
+            ARTEFACT: '#64748b',// Slate
+            
+            // POPULATIONS
+            NT: '#0891b2',      // Cyan
+            ASD: '#c026d3',     // Fuchsia
+            ADHD: '#e11d48',    // Rose
+            
+            // BG
+            BG_HUMAN: 'rgba(79, 70, 229, 0.2)',
+            BG_LLM: 'rgba(16, 185, 129, 0.2)'
+        };
+
+        // --- HIERARCHICAL DATA STORE ---
+        const deck = {
+            "0-premises": {
+                label: "0. Premises",
+                slides: {
+                    "main": {
+                        title: "The Pedagogical Paradox",
+                        subtitle: "Evolutionary Biology vs Generative AI",
+                        content: `
+                            <div class="prose prose-slate max-w-none">
+                                <p class="lead text-xl text-indigo-900 font-medium">Does the "Who" matter, or only the "What"?</p>
+                                <p><strong>Established Science:</strong> Human learning is historically defined as a <em>social process</em>. Neurobiologically, we are wired to learn from others; signals like eye gaze, shared attention, and emotional prosody modulate neuroplasticity (Vygotsky, Bandura).</p>
+                                <div class="my-6 p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-md">
+                                    <h4 class="text-amber-800 font-bold text-sm uppercase mb-1">The New Actor</h4>
+                                    <p class="text-sm text-amber-900">The <strong>Large Language Model (LLM)</strong> introduces a paradox: it possesses high linguistic competence (High Intelligence) but zero social intent (No Consciousness). It acts like a "Who" but is physiologically a "What".</p>
+                                </div>
+                                <p><strong>The Gap:</strong> Current literature focuses on accuracy. We focus on <em>neuroergonomics</em>. How does the social brain react to a teacher that has no mind?</p>
+                            </div>
+                        `,
+                        chartType: 'radar',
+                        chartData: {
+                            labels: ['Linguistic Competence', 'Social Intent', 'Biological Empathy', 'Fact Retrieval', 'Context Awareness'],
+                            datasets: [{
+                                label: 'Human Tutor',
+                                data: [90, 100, 100, 80, 95],
+                                borderColor: COLORS.HUMAN,
+                                backgroundColor: COLORS.BG_HUMAN,
+                                pointBackgroundColor: COLORS.HUMAN,
+                                borderWidth: 2
+                            }, {
+                                label: 'LLM Agent',
+                                data: [99, 10, 0, 100, 60],
+                                borderColor: COLORS.LLM,
+                                backgroundColor: COLORS.BG_LLM,
+                                pointBackgroundColor: COLORS.LLM,
+                                borderWidth: 2
+                            }]
+                        },
+                        chartOptions: {
+                            plugins: { title: { display: true, text: 'The Asymmetry: Competence Profile' } },
+                            scales: { r: { min: 0, max: 100, ticks: { display: false } } }
+                        }
+                    }
+                }
+            },
+            "1-setting": {
+                label: "1. Exp. Setting",
+                slides: {
+                    "design": {
+                        label: "1a. Design",
+                        title: "Experimental Design",
+                        subtitle: "Transient States, Not Fixed Categories",
+                        content: `
+                            <div class="space-y-6">
+                                <div class="bg-amber-50 border-l-4 border-amber-500 p-4 mb-4">
+                                    <h4 class="font-bold text-amber-900 mb-2">🔄 The Paradigm Shift</h4>
+                                    <p class="text-sm text-amber-800">We don't study "pathology" vs "normal". We study <strong>transient states accessible to everyone</strong> under specific conditions.</p>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-slate-900 mb-2">The Three Snapshots (State Levers)</h4>
+                                    <p class="text-sm text-slate-600 mb-3">Each "population" represents a <em>stress-dependent state</em> that any human can enter:</p>
+                                    <ul class="space-y-3 text-sm">
+                                        <li class="flex items-start gap-2">
+                                            <span class="font-bold text-cyan-700 min-w-[80px]">NT Cohort:</span>
+                                            <span class="text-slate-700">Snapshot of humans in <em>optimal conditions</em> (rest, support, health). Statistical baseline.</span>
+                                        </li>
+                                        <li class="flex items-start gap-2">
+                                            <span class="font-bold text-fuchsia-700 min-w-[80px]">ASD-like:</span>
+                                            <span class="text-slate-700">State of <em>rigidity</em> anyone can reach (burnout, hypervigilance, trauma). Tests social bypass.</span>
+                                        </li>
+                                        <li class="flex items-start gap-2">
+                                            <span class="font-bold text-rose-700 min-w-[80px]">ADHD-like:</span>
+                                            <span class="text-slate-700">State of <em>dispersion</em> accessible to all (sleep deprivation, overload). Tests executive cost.</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="bg-slate-50 p-3 rounded border border-slate-200">
+                                    <p class="text-xs text-slate-600"><strong>Goal:</strong> Build a <em>pragmatic, a posteriori</em> model of human adaptability across the epigenetic landscape, not idealistic categories.</p>
+                                </div>
+                                <hr class="border-slate-100">
+                                <div>
+                                    <h4 class="font-bold text-slate-900 mb-2">The Three Environments</h4>
+                                    <div class="grid grid-cols-1 gap-3">
+                                        <div class="p-3 bg-indigo-50 rounded border border-indigo-100">
+                                            <span class="font-bold text-indigo-700">G1: Human (Social)</span>
+                                            <span class="block text-xs text-indigo-600">Max Social Load. Face-to-face.</span>
+                                        </div>
+                                        <div class="p-3 bg-emerald-50 rounded border border-emerald-100">
+                                            <span class="font-bold text-emerald-700">G4: LLM (Synthetic)</span>
+                                            <span class="block text-xs text-emerald-600">Active. Asocial. High Executive Load.</span>
+                                        </div>
+                                        <div class="p-3 bg-slate-50 rounded border border-slate-200">
+                                            <span class="font-bold text-slate-700">G3: Book (Artefact)</span>
+                                            <span class="block text-xs text-slate-500">Passive study. Low Arousal.</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `,
+                        chartType: 'bar',
+                        chartData: {
+                            labels: ['Social Load', 'Executive Load', 'Interactivity'],
+                            datasets: [
+                                { label: 'G1 (Human)', data: [90, 60, 80], backgroundColor: COLORS.HUMAN },
+                                { label: 'G3 (Book)', data: [10, 30, 10], backgroundColor: COLORS.ARTEFACT },
+                                { label: 'G4 (LLM)', data: [20, 95, 90], backgroundColor: COLORS.LLM }
+                            ]
+                        },
+                        chartOptions: {
+                            indexAxis: 'y',
+                            scales: { x: { beginAtZero: true, max: 100 } },
+                            plugins: { title: { display: true, text: 'Environmental Attributes' } }
+                        }
+                    },
+                    "procedure": {
+                        label: "1b. Procedure",
+                        title: "Experimental Procedure",
+                        subtitle: "The Protocol & Variable Manipulation",
+                        content: `
+                            <div class="space-y-6">
+                                <div>
+                                    <h4 class="font-bold text-slate-900 mb-2">The Session Timeline (Acute)</h4>
+                                    <p class="text-sm text-slate-600 mb-4">Standardized 45-minute protocol.</p>
+                                    <div class="relative pl-4 border-l-2 border-indigo-100 space-y-4">
+                                        <div class="relative">
+                                            <div class="absolute -left-[21px] top-1 w-3 h-3 bg-slate-300 rounded-full"></div>
+                                            <h5 class="font-bold text-slate-800 text-sm">T0: Baseline (5 min)</h5>
+                                            <p class="text-xs text-slate-500">Resting State fNIRS + HRV.</p>
+                                        </div>
+                                        <div class="relative">
+                                            <div class="absolute -left-[21px] top-1 w-3 h-3 bg-indigo-500 rounded-full"></div>
+                                            <h5 class="font-bold text-indigo-700 text-sm">T1: The Task (20 min) - <span class="italic">Manipulation</span></h5>
+                                            <p class="text-xs text-indigo-900">
+                                                <strong>IV1 (Environment):</strong> Participant enters G1, G3, or G4.<br>
+                                                <strong>IV2 (Mode):</strong> Instruction to adopt "Oracle" or "Sparring".
+                                            </p>
+                                        </div>
+                                        <div class="relative">
+                                            <div class="absolute -left-[21px] top-1 w-3 h-3 bg-emerald-500 rounded-full"></div>
+                                            <h5 class="font-bold text-emerald-700 text-sm">T2: Assessment (10 min)</h5>
+                                            <p class="text-xs text-emerald-900">Measuring Retention vs Transfer.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="bg-slate-50 p-3 rounded border border-slate-200">
+                                    <h4 class="font-bold text-slate-800 text-xs uppercase mb-1">Acquisition</h4>
+                                    <p class="text-xs text-slate-600">Continuous HbO (fNIRS) and IBI (HRV) recording.</p>
+                                </div>
+                            </div>
+                        `,
+                        chartType: 'bar',
+                        chartData: {
+                            labels: ['T0: Baseline', 'Instr.', 'T1: Task', 'Washout', 'T2: Test'],
+                            datasets: [{
+                                label: 'Minutes',
+                                data: [5, 2, 20, 3, 15],
+                                backgroundColor: [COLORS.ARTEFACT, COLORS.ARTEFACT, COLORS.HUMAN, COLORS.ARTEFACT, COLORS.LLM],
+                                borderRadius: 4,
+                                barPercentage: 0.6
+                            }]
+                        },
+                        chartOptions: {
+                            indexAxis: 'y',
+                            plugins: { title: { display: true, text: 'Session Timeline' }, legend: { display: false } },
+                            scales: { x: { title: { display: true, text: 'Time (min)' } } }
+                        }
+                    }
+                }
+            },
+            "2-rq1": {
+                label: "RQ1: Social Weight",
+                slides: {
+                    "bypass": {
+                        label: "2a. Social Bypass",
+                        title: "RQ1: Is Human Always Better?",
+                        subtitle: "Hypothesis: The Social Bypass (ASD Focus)",
+                        content: `
+                            <div class="prose prose-slate">
+                                <p><strong>The Question:</strong> Is human social presence always beneficial for learning, or does it impose a metabolic cost?</p>
+                                <div class="p-4 bg-fuchsia-50 border border-fuchsia-200 rounded-lg my-4">
+                                    <h4 class="font-bold text-fuchsia-800 text-sm">Hypothesis: Social Bypass</h4>
+                                    <p class="text-sm text-fuchsia-900">When in a <em>rigid state</em> (high vigilance, depleted executive resources), the human tutor (G1) imposes "Social Calculation Load" (decoding face/tone/intent). The LLM (G4), being socially "silent", bypasses this obstacle.</p>
+                                </div>
+                                <p><strong>Predicted Mechanism (Interaction Effect):</strong></p>
+                                <ul class="text-sm space-y-2">
+                                    <li><span class="font-bold text-cyan-600">Baseline State (NT):</span> Perform better in G1 (Human). Social cues buffer stress and aid retention.</li>
+                                    <li><span class="font-bold text-fuchsia-600">Rigid State (ASD-like):</span> Perform better in G4 (LLM). Cognitive resources shift from social decoding (Amygdala) to content processing (DLPFC).</li>
+                                </ul>
+                                <p class="text-xs text-slate-500 mt-4"><em>This effect is universal: anyone under chronic stress may benefit from "social bypass" when cognitive load is high.</em></p>
+                            </div>
+                        `,
+                        chartType: 'line',
+                        chartData: {
+                            labels: ['G1: Human Tutor', 'G4: LLM Tutor'],
+                            datasets: [
+                                { label: 'Neurotypical (NT)', data: [85, 65], borderColor: COLORS.NT, backgroundColor: COLORS.NT, borderWidth: 3, tension: 0.1 },
+                                { label: 'ASD Group', data: [55, 88], borderColor: COLORS.ASD, backgroundColor: COLORS.ASD, borderWidth: 3, tension: 0.1 }
+                            ]
+                        },
+                        chartOptions: {
+                            plugins: { 
+                                title: { display: true, text: 'The Crossover Interaction: Performance Score' },
+                                tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw}% Retention` } }
+                            },
+                            scales: { y: { min: 40, max: 100, title: { display: true, text: 'Learning Outcome' } } }
+                        }
+                    },
+                    "depuration": {
+                        label: "2b. Logical Depuration",
+                        title: "RQ1: Ethics & The Machine",
+                        subtitle: "Hypothesis: Logical Depuration (Idea 1)",
+                        content: `
+                            <div class="prose prose-slate">
+                                <p><strong>The Context:</strong> When discussing controversial or ethical topics, human interaction activates emotional contagion circuitry.</p>
+                                <div class="p-4 bg-indigo-50 border border-indigo-200 rounded-lg my-4">
+                                    <h4 class="font-bold text-indigo-800 text-sm">Hypothesis: Logical Depuration</h4>
+                                    <p class="text-sm text-indigo-900">The LLM acts as a "clean room" for logic. Without biological feedback (facial microexpressions, prosody), the brain downregulates emotional networks, enabling pure utilitarian reasoning.</p>
+                                </div>
+                                <p><strong>Neurophysiological Marker (fNIRS/fMRI):</strong></p>
+                                <ul class="text-sm space-y-2">
+                                    <li><strong>In G1 (Human):</strong> High activation of <span class="text-rose-600 font-bold">Amygdala</span> & vmPFC (Emotional Valuation). Social conformity pressure.</li>
+                                    <li><strong>In G4 (LLM):</strong> High activation of <span class="text-blue-600 font-bold">DLPFC</span> (Utilitarian Logic). Amygdala at baseline. Liberation from social judgment.</li>
+                                </ul>
+                                <p class="text-xs text-slate-500 mt-4"><em>Universal mechanism: Anyone can access "cold logic" mode when social evaluation cues are absent.</em></p>
+                            </div>
+                        `,
+                        chartType: 'bar',
+                        chartData: {
+                            labels: ['Amygdala (Emotion)', 'DLPFC (Logic)'],
+                            datasets: [
+                                { label: 'G1: Human Tutor', data: [0.85, 0.5], backgroundColor: COLORS.HUMAN },
+                                { label: 'G4: LLM Tutor', data: [0.2, 0.9], backgroundColor: COLORS.LLM }
+                            ]
+                        },
+                        chartOptions: {
+                            plugins: { title: { display: true, text: 'Neural Activation during Ethical Reasoning' } },
+                            scales: { y: { beginAtZero: true, max: 1.0, title: { display: true, text: 'Hemodynamic Response (HbO)' } } }
+                        }
+                    }
+                }
+            },
+            "3-rq2": {
+                label: "RQ2: Interactivity",
+                slides: {
+                    "phantom": {
+                        label: "3a. Phantom ToM",
+                        title: "RQ2: Artefact vs Agent",
+                        subtitle: "Hypothesis: Phantom Theory of Mind (Idea 2)",
+                        content: `
+                            <div class="prose prose-slate">
+                                <p><strong>The Question:</strong> Is an LLM just a book that talks back? Or does the interactivity trick the brain?</p>
+                                <div class="p-4 bg-amber-50 border border-amber-200 rounded-lg my-4">
+                                    <h4 class="font-bold text-amber-800 text-sm">Hypothesis: Phantom ToM</h4>
+                                    <p class="text-sm text-amber-900">Unlike a passive book (G3), the responsive nature of the LLM (G4) triggers the <span class="font-bold">Right Temporo-Parietal Junction (rTPJ)</span>—the centre of Theory of Mind.</p>
+                                </div>
+                                <p><strong>Comparison (NT vs ASD):</strong></p>
+                                <ul class="text-sm space-y-2">
+                                    <li><span class="font-bold text-cyan-600">Neurotypicals:</span> Show a "Habituation Curve". Initial rTPJ spike, then rapid drop.</li>
+                                    <li><span class="font-bold text-fuchsia-600">ASD Cohort:</span> Show "Sustained Engagement". The rTPJ stays active. The LLM serves as a safe "Social Gym".</li>
+                                </ul>
+                            </div>
+                        `,
+                        chartType: 'line',
+                        chartData: {
+                            labels: ['Start', '5 min', '10 min', '15 min', '20 min'],
+                            datasets: [
+                                { label: 'ASD Group (in G4 LLM)', data: [0.4, 0.6, 0.65, 0.7, 0.68], borderColor: COLORS.ASD, backgroundColor: COLORS.ASD, tension: 0.3, fill: false },
+                                { label: 'NT Group (in G4 LLM)', data: [0.4, 0.5, 0.3, 0.2, 0.15], borderColor: COLORS.NT, backgroundColor: COLORS.NT, borderDash: [5, 5], tension: 0.3, fill: false },
+                                { label: 'Baseline (G3 Book)', data: [0.1, 0.1, 0.1, 0.1, 0.1], borderColor: COLORS.ARTEFACT, tension: 0.1 }
+                            ]
+                        },
+                        chartOptions: {
+                            plugins: { title: { display: true, text: 'rTPJ Activation Over Time' } },
+                            scales: { y: { beginAtZero: true, max: 0.8, title: { display: true, text: 'Activation Level (z-score)' } } }
+                        }
+                    },
+                    "burnout": {
+                        label: "3b. Burnout",
+                        title: "RQ2: The Cost of Interaction",
+                        subtitle: "Hypothesis: Cognitive Burnout (Idea 4)",
+                        content: `
+                            <div class="prose prose-slate">
+                                <p><strong>The Question:</strong> Active learning (Constructivism) is effective, but is it sustainable?</p>
+                                <div class="p-4 bg-rose-50 border border-rose-200 rounded-lg my-4">
+                                    <h4 class="font-bold text-rose-800 text-sm">Hypothesis: Constructivist Burnout</h4>
+                                    <p class="text-sm text-rose-900">"Sparring" with an AI requires constant executive maintenance (Fact-checking, Prompting). This has a metabolic cost.</p>
+                                </div>
+                                <p><strong>Analysis: Survival Curve (Time-to-Event)</strong></p>
+                                <p class="text-sm">We measure the time until <strong>HRV (Heart Rate Variability)</strong> drops below the stress threshold (RMSSD < 20ms).</p>
+                                <ul class="text-sm mt-2 space-y-1">
+                                    <li><strong>Result:</strong> The ADHD group (known for executive dysfunction) shows a steep decline in the LLM condition.</li>
+                                </ul>
+                            </div>
+                        `,
+                        chartType: 'line',
+                        chartData: {
+                            labels: ['0 min', '10 min', '20 min', '30 min', '40 min'],
+                            datasets: [
+                                { label: 'ADHD in G4 (LLM Sparring)', data: [1.0, 0.8, 0.5, 0.2, 0.1], borderColor: COLORS.ADHD, backgroundColor: 'rgba(225, 29, 72, 0.1)', fill: true, tension: 0.2 },
+                                { label: 'NT in G4 (LLM Sparring)', data: [1.0, 0.95, 0.9, 0.85, 0.8], borderColor: COLORS.NT, fill: false, tension: 0.2 }
+                            ]
+                        },
+                        chartOptions: {
+                            plugins: { title: { display: true, text: 'Survival Analysis: Time to Cognitive Burnout' } },
+                            scales: { y: { min: 0, max: 1.0, title: { display: true, text: 'Probability of Sustained Attention' } } }
+                        }
+                    }
+                }
+            },
+            "4-implications": {
+                label: "4. Implications",
+                slides: {
+                    "main": {
+                        title: "Take-Home Messages",
+                        subtitle: "For Whom?",
+                        content: `
+                            <div class="space-y-6">
+                                <div class="bg-amber-50 border-l-4 border-amber-500 p-4">
+                                    <h4 class="font-bold text-amber-900 mb-2">🌍 A Universal Model</h4>
+                                    <p class="text-sm text-amber-800">These findings apply to <em>all humans</em> depending on their current state, not just clinical populations.</p>
+                                </div>
+                                
+                                <div class="grid grid-cols-1 gap-4">
+                                    <div class="bg-cyan-50 p-4 rounded-lg border-l-4 border-cyan-500">
+                                        <h4 class="font-bold text-cyan-900">When in Baseline/Optimal State</h4>
+                                        <p class="text-sm text-cyan-800 mt-1"><strong>Human (G1)</strong> is ideal. Social buffering reduces cortisol, enhances engagement. Use LLM for logical tasks only.</p>
+                                    </div>
+                                    <div class="bg-fuchsia-50 p-4 rounded-lg border-l-4 border-fuchsia-500">
+                                        <h4 class="font-bold text-fuchsia-900">When in Rigid/Vigilant State</h4>
+                                        <p class="text-sm text-fuchsia-800 mt-1"><strong>LLM (G4)</strong> provides <em>social bypass</em>. Useful during burnout, trauma recovery, or when social decoding is costly (e.g., autistic shutdown, PTSD hypervigilance).</p>
+                                    </div>
+                                    <div class="bg-rose-50 p-4 rounded-lg border-l-4 border-rose-500">
+                                        <h4 class="font-bold text-rose-900">When in Dispersed/Overload State</h4>
+                                        <p class="text-sm text-rose-800 mt-1"><strong>Warning:</strong> Active LLM interaction has high executive cost. Risk of burnout if already depleted (sleep deprivation, ADHD episode, chronic stress). Prefer passive learning.</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-slate-100 p-4 rounded-lg">
+                                    <h4 class="font-bold text-slate-900 mb-2">Clinical Implication</h4>
+                                    <p class="text-sm text-slate-700">Design <em>adaptive pedagogical systems</em> that detect the learner's current epigenetic state (HRV, cortisol, cognitive load) and switch between Human/LLM/Passive modes accordingly.</p>
+                                </div>
+                            </div>
+                        `,
+                        chartType: 'doughnut',
+                        chartData: {
+                            labels: ['Social Buffer (Human)', 'Social Bypass (LLM-ASD)', 'Logical Tool (LLM-NT)'],
+                            datasets: [{
+                                data: [33, 33, 33],
+                                backgroundColor: [COLORS.HUMAN, COLORS.LLM, COLORS.ARTEFACT]
+                            }]
+                        },
+                        chartOptions: {
+                            plugins: { title: { display: true, text: 'A Pluralistic Pedagogy' } }
+                        }
+                    }
+                }
+            },
+            "5-pnei": {
+                label: "5. PNEI Model",
+                slides: {
+                    "main": {
+                        title: "Waddington Epigenetic Landscape",
+                        subtitle: "Interactive Simulation of Human States",
+                        content: `
+                            <div class="space-y-4">
+                                <div class="bg-indigo-50 border-l-4 border-indigo-500 p-4">
+                                    <h4 class="font-bold text-indigo-900 mb-2">🏔️ The Model</h4>
+                                    <p class="text-sm text-indigo-800">Human state visualized as a particle in an <strong>epigenetic potential landscape</strong> following Langevin dynamics:</p>
+                                    <p class="text-center font-mono text-sm text-indigo-900 mt-2">dx/dt = -∇U(x) + ξ(t)</p>
+                                </div>
+                                
+                                <div class="space-y-3 text-sm">
+                                    <div>
+                                        <span class="font-bold text-slate-900">U(x) - Potential:</span>
+                                        <span class="text-slate-600"> Landscape shape (genetics, learning history)</span>
+                                    </div>
+                                    <div>
+                                        <span class="font-bold text-slate-900">-∇U(x) - Deterministic Force:</span>
+                                        <span class="text-slate-600"> Pull toward homeostasis (resilience)</span>
+                                    </div>
+                                    <div>
+                                        <span class="font-bold text-slate-900">ξ(t) - Stochastic Noise:</span>
+                                        <span class="text-slate-600"> Environmental stress, sensory input</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-amber-50 p-3 rounded border border-amber-200">
+                                    <p class="text-xs text-amber-900"><strong>Key Insight:</strong> The landscape parameters aren't fixed traits—they change dynamically based on sleep, inflammation, social support, and cognitive load. <em>Everyone accesses all states.</em></p>
+                                </div>
+                                
+                                <div class="mt-4">
+                                    <h4 class="font-bold text-slate-900 mb-2 text-sm">Try the Interactive Model →</h4>
+                                    <p class="text-xs text-slate-600">Use the controls on the right to simulate different stress conditions and observe trajectory changes in real-time.</p>
+                                </div>
+                            </div>
+                        `,
+                        chartType: 'waddington',
+                        isInteractive: true
+                    }
+                }
+            }
+        };
+
+        // --- APP STATE & LOGIC ---
+        const mainNavContainer = document.getElementById('main-nav-container');
+        const subNavWrapper = document.getElementById('sub-nav-wrapper');
+        const subNavContainer = document.getElementById('sub-nav-container');
+        const textPanel = document.getElementById('text-panel');
+        const chartTitle = document.getElementById('chart-title');
+        let activeChart = null;
+
+        // Initial State
+        let currentSection = '0-premises';
+        let currentSlide = 'main';
+
+        function init() {
+            renderMainNav();
+            loadContent();
+        }
+
+        function renderMainNav() {
+            mainNavContainer.innerHTML = '';
+            Object.keys(deck).forEach(sectionKey => {
+                const section = deck[sectionKey];
+                const btn = document.createElement('button');
+                // Base Classes
+                btn.className = `nav-pill px-4 py-2 text-sm font-bold rounded-full whitespace-nowrap mr-2 border focus:outline-none`;
+                
+                // Active Logic
+                if (sectionKey === currentSection) {
+                    btn.classList.add('bg-indigo-600', 'text-white', 'border-transparent');
+                } else {
+                    btn.classList.add('bg-white', 'text-slate-600', 'border-slate-200', 'hover:bg-slate-50', 'hover:text-indigo-600');
+                }
+
+                btn.textContent = section.label;
+                btn.onclick = () => {
+                    currentSection = sectionKey;
+                    // Reset to first slide of section
+                    currentSlide = Object.keys(deck[sectionKey].slides)[0]; 
+                    renderMainNav(); // Re-render to update active state
+                    loadContent();
+                };
+                mainNavContainer.appendChild(btn);
+            });
+        }
+
+        function renderSubNav() {
+            const section = deck[currentSection];
+            const slideKeys = Object.keys(section.slides);
+
+            // If only 1 slide (like Premises or Implications), hide sub-nav
+            if (slideKeys.length <= 1 && slideKeys[0] === 'main') {
+                subNavWrapper.classList.add('hidden');
+                return;
+            }
+
+            // Show sub-nav
+            subNavWrapper.classList.remove('hidden');
+            subNavContainer.innerHTML = '';
+
+            slideKeys.forEach(slideKey => {
+                const slideData = section.slides[slideKey];
+                const btn = document.createElement('button');
+                
+                // Base Classes (Tab style)
+                btn.className = `sub-tab text-sm font-medium pb-2 px-1 whitespace-nowrap focus:outline-none`;
+                
+                if (slideKey === currentSlide) {
+                    btn.classList.add('text-indigo-700', 'active', 'font-bold');
+                } else {
+                    btn.classList.add('text-slate-500', 'hover:text-indigo-600');
+                }
+
+                btn.textContent = slideData.label || "Slide";
+                btn.onclick = () => {
+                    currentSlide = slideKey;
+                    renderSubNav(); // Update active state
+                    loadSlideData(slideData);
+                };
+                subNavContainer.appendChild(btn);
+            });
+        }
+
+        function loadContent() {
+            renderSubNav();
+            const slideData = deck[currentSection].slides[currentSlide];
+            loadSlideData(slideData);
+        }
+
+        function loadSlideData(data) {
+            // Update Text Panel
+            textPanel.innerHTML = `
+                <div class="mb-6 slide-enter">
+                    <h2 class="text-3xl font-bold text-slate-900">${data.title || ''}</h2>
+                    <p class="text-lg text-indigo-600 font-medium mt-1">${data.subtitle || ''}</p>
+                </div>
+                <div class="text-slate-600 leading-relaxed space-y-4 slide-enter" style="animation-delay: 0.1s">
+                    ${data.content}
+                </div>
+            `;
+            
+            // Update Chart or Interactive Widget
+            if (data.chartType === 'waddington') {
+                chartTitle.textContent = "Interactive Waddington Simulator";
+                renderWaddingtonWidget();
+            } else {
+                chartTitle.textContent = data.chartOptions?.plugins?.title?.text || "Data Visualisation";
+                updateChart(data.chartType, data.chartData, data.chartOptions);
+            }
+        }
+
+        function updateChart(type, data, options) {
+            const visualPanel = document.getElementById('visual-panel');
+            visualPanel.innerHTML = `
+                <div class="w-full max-w-md bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                    <h3 class="text-sm font-semibold text-slate-500 mb-4 uppercase tracking-wide text-center" id="chart-title">${options?.plugins?.title?.text || 'Data Visualisation'}</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="main-chart"></canvas>
+                    </div>
+                </div>
+            `;
+            
+            const ctx = document.getElementById('main-chart').getContext('2d');
+            if (activeChart) activeChart.destroy();
+            
+            activeChart = new Chart(ctx, {
+                type: type,
+                data: data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    ...options
+                }
+            });
+        }
+        
+        // --- WADDINGTON WIDGET ---
+        let waddingtonParams = { depth: 1.5, width: 1.5, noise: 0.5, steps: 300 };
+        
+        function renderWaddingtonWidget() {
+            const visualPanel = document.getElementById('visual-panel');
+            visualPanel.innerHTML = `
+                <div class="w-full bg-white p-4 rounded-xl shadow-sm border border-slate-200" style="max-width: 600px;">
+                    <h3 class="text-sm font-semibold text-slate-500 mb-3 uppercase tracking-wide text-center">Interactive Waddington Simulator</h3>
+                    
+                    <!-- Presets -->
+                    <div class="flex gap-2 mb-4">
+                        <button class="preset-btn-mini flex-1" onclick="loadWaddingtonPreset('baseline')">🟢 Baseline</button>
+                        <button class="preset-btn-mini flex-1" onclick="loadWaddingtonPreset('rigid')">🔵 Rigid</button>
+                        <button class="preset-btn-mini flex-1" onclick="loadWaddingtonPreset('dispersed')">🟡 Dispersed</button>
+                    </div>
+                    
+                    <!-- Controls -->
+                    <div class="waddington-controls">
+                        <div>
+                            <label class="text-xs font-semibold text-slate-600 mb-1 block">Depth (Resilience) <span id="w-depth-val" class="text-indigo-600">1.5</span></label>
+                            <input type="range" class="waddington-slider" id="w-depth" min="0.1" max="5" step="0.1" value="1.5" oninput="updateWaddington()">
+                        </div>
+                        <div>
+                            <label class="text-xs font-semibold text-slate-600 mb-1 block">Width (Flexibility) <span id="w-width-val" class="text-indigo-600">1.5</span></label>
+                            <input type="range" class="waddington-slider" id="w-width" min="0.5" max="4" step="0.1" value="1.5" oninput="updateWaddington()">
+                        </div>
+                        <div>
+                            <label class="text-xs font-semibold text-slate-600 mb-1 block">Noise (Stress) <span id="w-noise-val" class="text-indigo-600">0.5</span></label>
+                            <input type="range" class="waddington-slider" id="w-noise" min="0" max="2" step="0.05" value="0.5" oninput="updateWaddington()">
+                        </div>
+                        <div>
+                            <label class="text-xs font-semibold text-slate-600 mb-1 block">Steps <span id="w-steps-val" class="text-indigo-600">300</span></label>
+                            <input type="range" class="waddington-slider" id="w-steps" min="100" max="600" step="50" value="300" oninput="updateWaddington()">
+                        </div>
+                    </div>
+                    
+                    <!-- 3D Plot -->
+                    <div id="waddington-plot" style="height: 400px; margin-top: 12px;"></div>
+                    
+                    <!-- Metrics -->
+                    <div class="grid grid-cols-2 gap-2 mt-3">
+                        <div class="bg-slate-50 p-2 rounded border border-slate-200">
+                            <div class="text-xs text-slate-500 font-semibold">Allostatic Load</div>
+                            <div class="text-lg font-bold text-slate-900" id="w-metric-load">0.00</div>
+                        </div>
+                        <div class="bg-slate-50 p-2 rounded border border-slate-200">
+                            <div class="text-xs text-slate-500 font-semibold">State</div>
+                            <div class="text-lg font-bold text-slate-900" id="w-metric-state">Balanced</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            simulateWaddington();
+        }
+        
+        function loadWaddingtonPreset(type) {
+            switch(type) {
+                case 'baseline':
+                    waddingtonParams = { depth: 1.5, width: 1.5, noise: 0.5, steps: 300 };
+                    break;
+                case 'rigid':
+                    waddingtonParams = { depth: 4.0, width: 0.8, noise: 0.4, steps: 300 };
+                    break;
+                case 'dispersed':
+                    waddingtonParams = { depth: 0.5, width: 3.0, noise: 0.8, steps: 300 };
+                    break;
+            }
+            
+            document.getElementById('w-depth').value = waddingtonParams.depth;
+            document.getElementById('w-width').value = waddingtonParams.width;
+            document.getElementById('w-noise').value = waddingtonParams.noise;
+            document.getElementById('w-steps').value = waddingtonParams.steps;
+            
+            updateWaddington();
+        }
+        
+        function updateWaddington() {
+            waddingtonParams.depth = parseFloat(document.getElementById('w-depth').value);
+            waddingtonParams.width = parseFloat(document.getElementById('w-width').value);
+            waddingtonParams.noise = parseFloat(document.getElementById('w-noise').value);
+            waddingtonParams.steps = parseInt(document.getElementById('w-steps').value);
+            
+            document.getElementById('w-depth-val').textContent = waddingtonParams.depth.toFixed(1);
+            document.getElementById('w-width-val').textContent = waddingtonParams.width.toFixed(1);
+            document.getElementById('w-noise-val').textContent = waddingtonParams.noise.toFixed(2);
+            document.getElementById('w-steps-val').textContent = waddingtonParams.steps;
+            
+            simulateWaddington();
+        }
+        
+        function potential(x, y, depth, width) {
+            const r2 = x*x + y*y;
+            return -depth * Math.exp(-r2 / (2 * width * width)) + 0.05 * (x**4 + y**4);
+        }
+        
+        function simulateWaddington() {
+            const { depth, width, noise, steps } = waddingtonParams;
+            const dt = 0.05;
+            
+            // Generate landscape
+            const gridSize = 30;
+            const range = 4;
+            const xGrid = [], yGrid = [], zGrid = [];
+            
+            for (let i = 0; i < gridSize; i++) {
+                const row = [];
+                for (let j = 0; j < gridSize; j++) {
+                    const x = -range + (2 * range * j) / (gridSize - 1);
+                    const y = -range + (2 * range * i) / (gridSize - 1);
+                    row.push(potential(x, y, depth, width));
+                }
+                zGrid.push(row);
+            }
+            
+            for (let i = 0; i < gridSize; i++) {
+                xGrid.push(-range + (2 * range * i) / (gridSize - 1));
+                yGrid.push(-range + (2 * range * i) / (gridSize - 1));
+            }
+            
+            // Simulate trajectory
+            let x = 2.5, y = 2.5;
+            const trajX = [x], trajY = [y];
+            
+            for (let t = 0; t < steps; t++) {
+                const r2 = x*x + y*y;
+                const expFactor = Math.exp(-r2 / (2 * width * width));
+                
+                const fx = -(x * depth / (width * width)) * expFactor - 0.2 * x**3;
+                const fy = -(y * depth / (width * width)) * expFactor - 0.2 * y**3;
+                
+                const dx = fx * dt + noise * Math.sqrt(dt) * (Math.random() - 0.5) * 2;
+                const dy = fy * dt + noise * Math.sqrt(dt) * (Math.random() - 0.5) * 2;
+                
+                x += dx;
+                y += dy;
+                
+                trajX.push(x);
+                trajY.push(y);
+            }
+            
+            const trajZ = trajX.map((x, i) => potential(x, trajY[i], depth, width) + 0.15);
+            
+            // Plot
+            const surfaceTrace = {
+                type: 'surface',
+                x: xGrid,
+                y: yGrid,
+                z: zGrid,
+                colorscale: 'Viridis',
+                opacity: 0.85,
+                showscale: false,
+                hoverinfo: 'skip'
+            };
+            
+            const trajectoryTrace = {
+                type: 'scatter3d',
+                mode: 'lines+markers',
+                x: trajX,
+                y: trajY,
+                z: trajZ,
+                line: { color: '#ef4444', width: 3 },
+                marker: { size: 2.5, color: '#dc2626' },
+                hoverinfo: 'skip'
+            };
+            
+            const layout = {
+                scene: {
+                    xaxis: { title: '', showticklabels: false, range: [-4, 4] },
+                    yaxis: { title: '', showticklabels: false, range: [-4, 4] },
+                    zaxis: { title: '', showticklabels: false, range: [-depth * 1.2, 2] },
+                    camera: { eye: { x: 1.3, y: 1.3, z: 1.0 } }
+                },
+                margin: { l: 0, r: 0, b: 0, t: 0 },
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)'
+            };
+            
+            Plotly.newPlot('waddington-plot', [surfaceTrace, trajectoryTrace], layout, { 
+                responsive: true,
+                displayModeBar: false
+            });
+            
+            // Update metrics
+            const distances = trajX.slice(100).map((x, i) => Math.sqrt(x*x + trajY[100+i]**2));
+            const avgLoad = distances.reduce((a, b) => a + b, 0) / distances.length;
+            
+            document.getElementById('w-metric-load').textContent = avgLoad.toFixed(2);
+            
+            if (width < 1.2 && depth > 2.5) {
+                document.getElementById('w-metric-state').textContent = 'Rigid';
+            } else if (width > 2.5 && depth < 1.0) {
+                document.getElementById('w-metric-state').textContent = 'Dispersed';
+            } else {
+                document.getElementById('w-metric-state').textContent = 'Balanced';
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>
